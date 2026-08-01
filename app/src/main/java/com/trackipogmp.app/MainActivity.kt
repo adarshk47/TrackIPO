@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
             TrackIPOTheme {
                 IpoHomeScreen(
                     viewModel = hiltViewModel(),
-                    onIpoClick = { ipoId ->
+                    onIpoClick = { _ ->
                         // Navigate to detail
                     }
                 )

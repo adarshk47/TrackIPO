@@ -1,5 +1,6 @@
 package com.trackipogmp.app.data.repository
 
+import android.util.Log
 import com.trackipogmp.app.data.local.IpoDao
 import com.trackipogmp.app.data.model.IpoItem
 import com.trackipogmp.app.data.remote.IpoApiService
@@ -16,10 +17,13 @@ class IpoRepository @Inject constructor(
 
     suspend fun refreshIpos() {
         try {
+            Log.d("IpoRepository", "Refreshing IPOs from network...")
             val ipos = apiService.getIpos()
+            Log.d("IpoRepository", "Successfully fetched ${ipos.size} IPOs")
             ipoDao.insertIpos(ipos)
         } catch (e: Exception) {
-            // Mock data for initial testing if network fails (e.g. URL not set yet)
+            Log.e("IpoRepository", "Network fetch failed: ${e.message}", e)
+            // Mock data for initial testing if network fails
             val mockIpos = listOf(
                 IpoItem(
                     id = "1", name = "Tech Solutions Ltd", logoUrl = "", category = "Mainboard",

@@ -26,12 +26,20 @@ class IpoListViewModel @Inject constructor(
     fun loadIpos() {
         viewModelScope.launch {
             _uiState.value = IpoUiState.Loading
-            repository.allIpos.collect { ipos ->
-                if (ipos.isEmpty()) {
-                    repository.refreshIpos()
-                } else {
-                    _uiState.value = IpoUiState.Success(ipos)
+            try {
+                // First, ensure we have data
+                repository.refreshIpos()
+                
+                // Then observe the database
+                repository.allIpos.collect { ipos ->
+                    if (ipos.isEmpty()) {
+                        _uiState.value = IpoUiState.Error("No IPOs available even after refresh")
+                    } else {
+                        _uiState.value = IpoUiState.Success(ipos)
+                    }
                 }
+            } catch (e: Exception) {
+                _uiState.value = IpoUiState.Error("Failed to load data: ${e.message}")
             }
         }
     }
