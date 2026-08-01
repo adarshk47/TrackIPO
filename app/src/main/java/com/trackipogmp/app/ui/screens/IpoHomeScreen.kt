@@ -4,9 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -18,10 +16,23 @@ import com.trackipogmp.app.ui.viewmodel.IpoUiState
 @Composable
 fun IpoHomeScreen(viewModel: IpoListViewModel, onIpoClick: (String) -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Mainboard", "SME")
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("TrackIPO - GMP Trends") })
+            Column {
+                TopAppBar(title = { Text("TrackIPO - GMP Trends") })
+                TabRow(selectedTabIndex = selectedTabIndex) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = { Text(title) }
+                        )
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
@@ -30,12 +41,24 @@ fun IpoHomeScreen(viewModel: IpoListViewModel, onIpoClick: (String) -> Unit) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is IpoUiState.Success -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(8.dp)
-                    ) {
-                        items(state.ipos) { ipo ->
-                            IpoCardItem(ipo = ipo, onClick = { onIpoClick(ipo.id) })
+                    val filteredIpos = if (selectedTabIndex == 0) {
+                        state.ipos.filter { it.category.equals("Mainboard", ignoreCase = true) }
+                    } else {
+                        state.ipos.filter { it.category.equals("SME", ignoreCase = true) }
+                    }
+
+                    if (filteredIpos.isEmpty()) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("No IPOs found in this category")
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(8.dp)
+                        ) {
+                            items(filteredIpos) { ipo ->
+                                IpoCardItem(ipo = ipo, onClick = { onIpoClick(ipo.id) })
+                            }
                         }
                     }
                 }
