@@ -33,7 +33,7 @@ object NetworkModule {
         val contentType = "application/json".toMediaType()
         val json = Json { ignoreUnknownKeys = true }
         return Retrofit.Builder()
-            .baseUrl("https://raw.githubusercontent.com/username/repo/main/") // Replace with your GitHub Pages URL
+            .baseUrl("https://raw.githubusercontent.com/adarshk47/TrackIPO/main/") // Replace with your GitHub Pages URL
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
