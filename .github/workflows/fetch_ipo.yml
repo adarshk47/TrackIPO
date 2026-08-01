@@ -1,0 +1,32 @@
+name: Fetch IPO Data
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Every hour
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch data
+        run: python fetch_ipo.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add ipos.json
+          git commit -m "Update IPO data" || echo "No changes to commit"
+          git push
